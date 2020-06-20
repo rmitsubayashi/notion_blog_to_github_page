@@ -1,13 +1,12 @@
 from notion_reader import NotionReader
+from notion_writer import NotionWriter
 from notion_to_github_repo_converter import NotionToGithubRepoConverter
-from notion_repo import NotionRepo
 from github_publisher import GithubPublisher
 
 import os
 
 token = os.environ.get('NOTION_TOKEN')
-notion_repo = NotionRepo(token)
-notion_reader = NotionReader(notion_repo)
+notion_reader = NotionReader(token)
 notion_blog_url = os.environ.get('NOTION_BLOG_URL')
 entries = notion_reader.get_entries_to_update(notion_blog_url)
 print(str(len(entries)) + ' entries to update')
@@ -31,6 +30,7 @@ if len(notion_to_github_repo_converter.staged_files) + len(notion_to_github_repo
     )
 
     if success:
-        notion_reader.update_notion_entries_after_publishing(notion_blog_url)
+        notion_writer = NotionWriter(token)
+        notion_writer.update_notion_entries_after_publishing(notion_blog_url)
     else:
         print("could not push to github")
