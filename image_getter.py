@@ -24,28 +24,26 @@ class ImageGetter:
         if not os.path.exists(self.asset_dir + '\\' + notion_id):
             os.mkdir(self.asset_dir + '\\' + notion_id)
 
-    def _download_images(self, detail_list: List[NotionEntryDetails]):
-        for detail in detail_list:
-            self._make_asset_directory(detail.notion_id)
-            for url in detail.image_urls:
-                image_name = self._extract_image_name(url, detail.notion_id)
-                to_save_path = self._format_local_image_path(image_name, detail.notion_id)
-                urllib.request.urlretrieve(url, to_save_path)
+    def _download_images(self, detail: NotionEntryDetails):
+        self._make_asset_directory(detail.notion_id)
+        for url in detail.image_urls:
+            image_name = self._extract_image_name(url, detail.notion_id)
+            to_save_path = self._format_local_image_path(image_name, detail.notion_id)
+            urllib.request.urlretrieve(url, to_save_path)
 
     # formats the content and the urls. the urls will be what we save in the local repository, 
     # the content will be what Jekyll uses to identify the image
-    def _format_image_urls(self, detail_list: List[NotionEntryDetails]):
-        for detail in detail_list:
-            new_urls = []
-            for original_url in detail.image_urls:
-                image_name = self._extract_image_name(original_url, detail.notion_id)
-                content_with_removed_image_signature = self._remove_image_signature_from_markdown(detail.content, image_name)
-                content_with_jekyll_image_directory_path = self._set_jekyll_image_directory_path_in_markdown(
-                    content_with_removed_image_signature, detail.notion_id, image_name
-                )
-                detail.content = content_with_jekyll_image_directory_path
-                new_urls.append(self._format_local_image_path(image_name, detail.notion_id))
-            detail.image_urls = new_urls
+    def _format_image_urls(self, detail: NotionEntryDetails):
+        new_urls = []
+        for original_url in detail.image_urls:
+            image_name = self._extract_image_name(original_url, detail.notion_id)
+            content_with_removed_image_signature = self._remove_image_signature_from_markdown(detail.content, image_name)
+            content_with_jekyll_image_directory_path = self._set_jekyll_image_directory_path_in_markdown(
+                content_with_removed_image_signature, detail.notion_id, image_name
+            )
+            detail.content = content_with_jekyll_image_directory_path
+            new_urls.append(self._format_local_image_path(image_name, detail.notion_id))
+        detail.image_urls = new_urls
     
     def _extract_image_name(self, url: str, notion_id: str) -> str:
         prefix = settings.S3_URL_PREFIX_ENCODED

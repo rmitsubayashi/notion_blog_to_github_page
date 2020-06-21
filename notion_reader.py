@@ -50,5 +50,4 @@ class NotionReader:
             if isinstance(child, notion_block.ImageBlock):
                 url = child.display_source
                 urls.append(url)
-                print(url)
         return urls
