@@ -1,12 +1,13 @@
 import unittest
 import os
 from datetime import datetime
-from github_post import GithubPost
-from github_post import GithubPostFactory
+from jekyll_post_formatter import JekyllEntryDetails
+from jekyll_post_formatter import JekyllEntryFactory
+from jekyll_post_formatter import write_to_file
 
 class GithubPostTests(unittest.TestCase):
     def test_file_to_post(self):
-        post = GithubPostFactory().from_file_path('test/github_post.md')
+        post = JekyllEntryFactory().from_file_path('test/github_post.md')
         self.assertEqual('this is the title', post.title)
         self.assertEqual(25, post.date.day)
         self.assertEqual('unique id', post.unique_id)
@@ -17,8 +18,8 @@ class GithubPostTests(unittest.TestCase):
         file_path = 'test/2000-10-10-title.md'
         self.assertFalse(os.path.exists(file_path))
 
-        post = GithubPost('title', datetime(2000,10,10,10,0,0), 'unique id', ['jekyll','update'],'content')
-        post.write_to_file('test')
+        post = JekyllEntryDetails('title', datetime(2000,10,10,10,0,0), 'unique id', ['jekyll','update'],'content')
+        write_to_file(post, 'test')
 
         self.assertTrue(os.path.exists(file_path))
         f = open(file_path, 'r')
