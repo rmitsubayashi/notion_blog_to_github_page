@@ -1,37 +1,36 @@
-import notion.block as notion_block
-from notion_entry_details import NotionEntryDetails
-
-def convert_notion_to_markdown(notion_block: NotionEntryDetails) -> str:
-    return _convert_notion_to_markdown_recusively(notion_block)
-
-def _convert_notion_to_markdown_recusively(block):
-    # leaf node
-    if len(block.children) == 0:
-        return _convert_block_to_markdown(block)
+def convert_notion_to_markdown(blocks):
     markdown = ""
-    # parse leaf nodes first
-    for child in block.children:
-        markdown += _convert_notion_to_markdown_recusively(child) + '\n\n'
+    for block in blocks:
+        markdown += _convert_block_to_markdown(block) + "\n\n"
     return markdown
 
 def _convert_block_to_markdown(block):
-    if isinstance(block, notion_block.ImageBlock):
+    if block.type == "heading_1":
+        return "# " + _convert_rich_text_to_markdown(block.heading_1.rich_text)
+    elif block.type == "heading_2":
+        return "## " + _convert_rich_text_to_markdown(block.heading_2.rich_text)
+    elif block.type == "heading_3":
+        return "### " + _convert_rich_text_to_markdown(block.heading_3.rich_text)
+    elif block.type == "bulleted_list_item":
+        return "- " + _convert_rich_text_to_markdown(block.bulleted_list_item.rich_text)
+    elif block.type == "numbered_list_item":
+        return "1. " + _convert_rich_text_to_markdown(block.numbered_list_item.rich_text)
+    elif block.type == "paragraph":
+        return _convert_rich_text_to_markdown(block.paragraph.rich_text)
+    elif block.type == "code":
+        return "{% highlight " + block.code.language + "%}\n" + _convert_rich_text_to_markdown(block.code.rich_text) + "{% endhighlight %}"
+    elif block.type == "image":
         # note that this is not formatted for Jekyll yet.
         # returns the url AWS uses (lots of hashes and extra info.. ).
-        return "![](" + block.display_source + ")"
-    elif isinstance(block, notion_block.HeaderBlock):
-        return "# " + block.title
-    elif isinstance(block, notion_block.SubheaderBlock):
-        return "## " + block.title
-    elif isinstance(block, notion_block.SubsubheaderBlock):
-        return "### " + block.title
-    elif isinstance(block, notion_block.BulletedListBlock):
-        return "- " + block.title
-    elif isinstance(block, notion_block.NumberedListBlock):
-        return "1. " + block.title
-    elif isinstance(block, notion_block.CodeBlock):
-        lang = block.language.lower()
-        # Jekyll ready
-        return '{% highlight ' + lang + ' %}\n' + block.title + '{% endhighlight %}'
-    else:
-        return block.title
+        return "![](" + block.image.file.url + ")"
+
+def _convert_rich_text_to_markdown(rich_text):
+    markdown = ""
+    for text_block in rich_text:
+        if text_block.annotations.bold == True:
+            markdown += "__" + text_block.plain_text + "__"
+        elif text_block.href != None:
+            markdown += "[" + text_block.plain_text + "](" + text_block.href + ")"
+        else:
+            markdown += text_block.plain_text
+    return markdown
