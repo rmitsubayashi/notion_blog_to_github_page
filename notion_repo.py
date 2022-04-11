@@ -14,8 +14,7 @@ class NotionRepo:
         response = requests.post(self._base_url + "databases/"+table_id+"/query", headers=self._request_header)
         return json.loads(response.text, object_hook=lambda d: SimpleNamespace(**d)).results
     
-    def get_link_content(self, link):
-        page_id = link.replace("https://www.notion.so/","")
+    def get_link_content(self, page_id):
         response = requests.get(self._base_url + "blocks/" + page_id + "/children", headers=self._request_header)
         return json.loads(response.text, object_hook=lambda d: SimpleNamespace(**d)).results
 

@@ -15,7 +15,7 @@ class NotionReader:
         entry_blocks = self._get_entry_blocks_to_update(notion_link)
         entries = []
         for block in entry_blocks:
-            content_blocks = self._notion_repo.get_link_content(block.url)
+            content_blocks = self._notion_repo.get_link_content(block.id)
             content = md.convert_notion_to_markdown(content_blocks)
             entry = self._map_notion_block_to_entry_class(content_blocks, block, content, block.id)
             entries.append(entry)
